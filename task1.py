@@ -2,15 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-L, V, eps1 = 20, -1.0, 2.0
+L, V, eps1 = 6, -1.0, 2.0
 
 t = np.linspace(0, 20, 1000)
 
 H0 = V * (np.eye(L, k=1) + np.eye(L, k=-1))
 H1 = H0.copy()
 
-H1[18, 18] = eps1
-H1[1, 1] = eps1
+for well in range(0,5):
+    H1[well, well] = eps1
+
 
 E0, psi_0_eigenvectors = np.linalg.eigh(
     H0
@@ -75,28 +76,27 @@ def plot_animated(dataset):  # animates the probability density in time across s
     n_lanes = len(dataset)
     n_frames = len(dataset[0])
 
-    lanes = np.arange(n_lanes)
+    wells = np.arange(n_lanes)
 
     # Initial values
     densities = [data[0] for data in dataset]
 
-    (line,) = ax.plot(lanes, densities, "o-", linewidth=2, markersize=7)
+    (line,) = ax.plot(wells, densities, "o-", linewidth=2, markersize=7)
 
-    ax.set_xlabel("Lane")
+    ax.set_xlabel("Well number")
     ax.set_ylabel("Probability density")
 
     ax.set_xlim(-0.5, n_lanes - 0.5)
     ax.set_ylim(np.min(dataset), np.max(dataset))
 
-    ax.set_xticks(lanes)
+    ax.set_xticks(wells)
 
     def update(frame):
         densities = [data[frame] for data in dataset]
 
         # print(sum(densities)) double check that normalization is kept
 
-        line.set_data(lanes, densities)
-        ax.set_title(f"Time = {frame}")
+        line.set_data(wells, densities)
 
         return (line,)
 
@@ -112,6 +112,4 @@ wave_function_dataset = [abs(solution(t, i)) ** 2 for i in range(L)]
 
 plot3d(wave_function_dataset)
 
-plot_animated(wave_function_dataset).save("wavefunctions.mp4", writer="ffmpeg", fps=30)
-
-
+plot_animated(wave_function_dataset).save("wavefunctions.mp4", writer="ffmpeg", fps=120)
